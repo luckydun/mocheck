@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String   @id @default(cuid())
+  employeeId    String   @unique
+  firstName     String
+  lastName      String
+  password      String   // hashed
+  role          Role     @default(EMPLOYEE)
+  netSalary     Float    @default(0)
+  payableSalary Float    @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  Attendance Attendance[]
+}
+
+model Attendance {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  signInTime  DateTime?
+  signOutTime DateTime?
+  signOutAmount Float? 
+  selfieUrl   String?  // stored selfie
+  latitude    Float?
+  longitude   Float?
+  date        String   // YYYY-MM-DD for daily reset
+  isLate      Boolean  @default(false)
+
+  @@unique([userId, date])
+}
+
+enum Role {
+  ADMIN
+  HR
+  EMPLOYEE
+}
