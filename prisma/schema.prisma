@@ -17,7 +17,7 @@ model User {
   employeeId    String   @unique
   firstName     String
   lastName      String
-  password      String   // hashed
+  password      String
   role          Role     @default(EMPLOYEE)
   netSalary     Float    @default(0)
   payableSalary Float    @default(0)
@@ -28,17 +28,17 @@ model User {
 }
 
 model Attendance {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  signInTime  DateTime?
-  signOutTime DateTime?
-  signOutAmount Float? 
-  selfieUrl   String?  // stored selfie
-  latitude    Float?
-  longitude   Float?
-  date        String   // YYYY-MM-DD for daily reset
-  isLate      Boolean  @default(false)
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  signInTime    DateTime?
+  signOutTime   DateTime?
+  signOutAmount Float?
+  selfieUrl     String?
+  latitude      Float?
+  longitude     Float?
+  date          String   // YYYY-MM-DD
+  isLate        Boolean  @default(false)
 
   @@unique([userId, date])
 }
