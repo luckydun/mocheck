@@ -2,12 +2,12 @@
   "name": "geo-location-attendance-billing-system",
   "version": "0.1.0",
   "private": true,
-"scripts": {
-  "dev": "next dev",
-  "build": "npx prisma generate && next build",
-  "start": "next start",
-  "postinstall": "npx prisma generate"
-},
+  "scripts": {
+    "dev": "next dev",
+    "build": "npx prisma generate && next build",
+    "start": "next start",
+    "postinstall": "npx prisma generate"
+  },
   "dependencies": {
     "@prisma/client": "^7.6.0",
     "@prisma/config": "^7.6.0",
@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
