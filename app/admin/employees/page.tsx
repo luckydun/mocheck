@@ -77,20 +77,18 @@ export default function EmployeesPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to remove this employee?')) return;
-    
     await fetch(`/api/admin/employees/${id}`, { method: 'DELETE' });
     loadEmployees();
   };
 
   const makeHR = async (id: string) => {
     if (!confirm('Make this employee HR?')) return;
-    
     await fetch(`/api/admin/employees/${id}/make-hr`, { method: 'POST' });
     loadEmployees();
   };
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading employees...</div>;
+    return <div className="min-h-screen flex items-center justify-center text-xl">Loading employees...</div>;
   }
 
   return (
@@ -103,11 +101,26 @@ export default function EmployeesPage() {
           </div>
           <button
             onClick={() => router.push('/admin')}
+            className="px-6 py-2 text-blue-600 hover:bg-blue-100 rounded-lg transition"
+          >
             ← Back to Admin Dashboard
           </button>
+        </div>
+
+        {/* Add/Edit Form */}
+        <div className="bg-white p-8 rounded-2xl shadow mb-10">
+          <h2 className="text-2xl font-semibold mb-6">
+            {editingId ? 'Edit Employee' : 'Add New Employee'}
+          </h2>
+          
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium mb-2">First Name</label>
+              <input
+                type="text"
+                value={form.firstName}
                 onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
