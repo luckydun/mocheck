@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic';
-
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
@@ -15,12 +13,7 @@ export async function POST(req: NextRequest) {
       where: { employeeId }
     });
 
-    if (!user) {
-      return NextResponse.json({ error: 'Invalid Employee ID or Password' }, { status: 401 });
-    }
-
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       return NextResponse.json({ error: 'Invalid Employee ID or Password' }, { status: 401 });
     }
 
@@ -30,12 +23,22 @@ export async function POST(req: NextRequest) {
       { expiresIn: '24h' }
     );
 
-    return NextResponse.json({
-      token,
+    const response = NextResponse.json({
+      success: true,
       role: user.role,
       employeeId: user.employeeId,
       firstName: user.firstName
     });
+
+    // Set HTTP-only cookie
+    response.cookies.set('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60,
+      path: '/',
+    });
+
+    return response;
   } catch (error) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
