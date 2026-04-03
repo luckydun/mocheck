@@ -145,39 +145,41 @@ export default function EmployeesPage() {
             <h2 className="text-xl font-semibold">All Employees ({employees.length})</h2>
           </div>
           <table className="w-full">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="text-left p-4">Employee ID</th>
-                <th className="text-left p-4">Name</th>
-                <th className="text-left p-4">Role</th>
-                <th className="text-right p-4">Net Salary</th>
-                <th className="text-right p-4">Payable Salary</th>
-                <th className="p-4">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {employees.map((emp) => (
-                <tr key={emp.id} className="border-t hover:bg-gray-50">
-                  <td className="p-4 font-mono">{emp.employeeId}</td>
-                  <td className="p-4">{emp.firstName} {emp.lastName}</td>
-                  <td className="p-4">
-                    <span className={`px-3 py-1 rounded-full text-xs ${emp.role === 'ADMIN' ? 'bg-red-100 text-red-700' : emp.role === 'HR' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'}`}>
-                      {emp.role}
-                    </span>
-                  </td>
-                  <td className="p-4 text-right font-semibold">UGX {emp.netSalary.toLocaleString()}</td>
-                  <td className="p-4 text-right font-semibold text-green-600">UGX {emp.payableSalary.toLocaleString()}</td>
-                  <td className="p-4">
-                    <button onClick={() => handleEdit(emp)} className="text-blue-600 hover:underline mr-4">Edit</button>
-                    {emp.role !== 'ADMIN' && (
-                      <button onClick={() => makeHR(emp.id)} className="text-purple-600 hover:underline mr-4">Make HR</button>
-                    )}
-                    {emp.role !== 'ADMIN' && (
-                      <button onClick={() => handleDelete(emp.id)} className="text-red-600 hover:underline">Remove</button>
-                    )}
-                  </td>
-                </tr>
-          </table>
+  <thead className="bg-gray-100">
+    <tr>
+      <th className="text-left p-4">Employee ID</th>
+      <th className="text-left p-4">Name</th>
+      <th className="text-left p-4">Role</th>
+      <th className="text-right p-4">Net Salary</th>
+      <th className="text-right p-4">Payable Salary</th>
+      <th className="p-4">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {employees.map((emp) => (
+      <tr key={emp.id} className="border-t hover:bg-gray-50">
+        <td className="p-4 font-mono">{emp.employeeId}</td>
+        <td className="p-4">{emp.firstName} {emp.lastName}</td>
+        <td className="p-4">
+          <span className={`px-3 py-1 rounded-full text-xs ${emp.role === 'ADMIN' ? 'bg-red-100 text-red-700' : emp.role === 'HR' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'}`}>
+            {emp.role}
+          </span>
+        </td>
+        <td className="p-4 text-right font-semibold">UGX {emp.netSalary.toLocaleString()}</td>
+        <td className="p-4 text-right font-semibold text-green-600">UGX {emp.payableSalary.toLocaleString()}</td>
+        <td className="p-4">
+          <button onClick={() => handleEdit(emp)} className="text-blue-600 hover:underline mr-4">Edit</button>
+          {emp.role !== 'ADMIN' && (
+            <button onClick={() => makeHR(emp.id)} className="text-purple-600 hover:underline mr-4">Make HR</button>
+          )}
+          {emp.role !== 'ADMIN' && (
+            <button onClick={() => handleDelete(emp.id)} className="text-red-600 hover:underline">Remove</button>
+          )}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
         </div>
     </div>
   );
