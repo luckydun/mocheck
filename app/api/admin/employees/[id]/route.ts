@@ -12,16 +12,21 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         lastName,
         employeeId,
         netSalary: Number(netSalary),
-        payableSalary: Number(netSalary),   // reset payable when net salary is updated by Admin
+        payableSalary: Number(netSalary),   // Reset payable salary when Admin updates Net Salary
       }
     });
 
-    return NextResponse.json({ message: 'Employee updated', employee: updated });
+    return NextResponse.json({ message: 'Employee updated successfully', employee: updated });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update employee' }, { status: 500 });
   }
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  await prisma.user.delete({ where: { id: params.id } });
-  return NextResponse.json({ message: 'Employee removed' });
+  try {
+    await prisma.user.delete({ where: { id: params.id } });
+    return NextResponse.json({ message: 'Employee removed successfully' });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to remove employee' }, { status: 500 });
+  }
+}
