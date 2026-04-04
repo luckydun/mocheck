@@ -17,21 +17,24 @@ export async function POST(req: NextRequest) {
 
     const { latitude, longitude, selfie, signOutAmount } = await req.json();
 
-    if (signOutAmount > 20000 || signOutAmount <= 0) {
-      return NextResponse.json({ error: 'Sign out amount must be between 1 and 20,000 UGX' }, { status: 400 });
+    // Allow 0 (no withdrawal) but cap at 20,000
+    const amount = Number(signOutAmount) || 0;
+    if (amount > 20000) {
+      return NextResponse.json({ error: 'Sign out amount cannot exceed UGX 20,000' }, { status: 400 });
     }
 
     // Geo check
     const distance = getDistanceFromLatLonInMeters(latitude, longitude, WORKPLACE_LAT, WORKPLACE_LNG);
     if (distance > RADIUS) {
-      return NextResponse.json({ error: 'You are not at the workplace' }, { status: 400 });
+      return NextResponse.json({ error: 'You are not at the workplace (Kampala office)' }, { status: 400 });
     }
 
     const now = new Date();
     const hours = now.getHours();
+    const minutes = now.getMinutes();
 
     // Sign Out window: 20:00 - 23:30 EAT
-    if (hours < 20 || (hours === 23 && now.getMinutes() > 30)) {
+    if (hours < 20 || (hours === 23 && minutes > 30)) {
       return NextResponse.json({ error: 'Sign out only allowed between 8:00pm and 11:30pm EAT' }, { status: 400 });
     }
 
@@ -49,26 +52,31 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Already signed out today' }, { status: 400 });
     }
 
-    // Update attendance and subtract from payable salary
+    // Update attendance
     await prisma.attendance.update({
       where: { id: attendance.id },
       data: {
         signOutTime: now,
-        signOutAmount,
+        signOutAmount: amount,
         selfieUrl: selfie || attendance.selfieUrl,
       }
     });
 
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        payableSalary: { decrement: signOutAmount }
-      }
-    });
+    // Only subtract if amount > 0
+    if (amount > 0) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          payableSalary: { decrement: amount }
+        }
+      });
+    }
 
-    return NextResponse.json({ 
-      message: `Signed out successfully. Received UGX ${signOutAmount}` 
-    });
+    const msg = amount > 0 
+      ? `Signed out successfully! Received UGX ${amount}` 
+      : 'Signed out successfully! (No cash withdrawn)';
+
+    return NextResponse.json({ message: msg });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: 'Sign out failed' }, { status: 500 });
