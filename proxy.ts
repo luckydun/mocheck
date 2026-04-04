@@ -7,37 +7,41 @@ const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-change-this-in-pr
 export function proxy(request: NextRequest) {
   const token = request.cookies.get('token')?.value;
 
+  // No token → force login
   if (!token) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as any;
-    const role = decoded.role;
+    const role = decoded.role || 'EMPLOYEE';
     const pathname = request.nextUrl.pathname;
 
-    // Allow Admin full access
+    // ADMIN → full access
     if (role === 'ADMIN') {
       return NextResponse.next();
     }
 
-    // Allow HR access to employee management, attendance and PDF
+    // HR → can access HR dashboard + shared admin pages
     if (role === 'HR') {
-      if (pathname.startsWith('/admin/employees') || 
+      if (pathname.startsWith('/hr') || 
+          pathname.startsWith('/admin/employees') || 
           pathname.startsWith('/admin/attendance') || 
           pathname.startsWith('/admin/pdf')) {
         return NextResponse.next();
       }
     }
 
-    // Employee only allowed to their own dashboard
+    // EMPLOYEE → only their dashboard
     if (role === 'EMPLOYEE' && pathname.startsWith('/employee')) {
       return NextResponse.next();
     }
 
-    // If none of the above, redirect to login
+    // If role doesn't match the path → redirect to login
     return NextResponse.redirect(new URL('/', request.url));
-  } catch {
+
+  } catch (err) {
+    // Invalid token → logout and go to login
     return NextResponse.redirect(new URL('/', request.url));
   }
 }
