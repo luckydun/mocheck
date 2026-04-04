@@ -7,7 +7,7 @@ export default function SignOutPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [photo, setPhoto] = useState<string | null>(null);
-  const [amount, setAmount] = useState(0);   // Default 0 = no withdrawal
+  const [amount, setAmount] = useState<number>(0);   // Default = 0 (no withdrawal)
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const router = useRouter();
@@ -61,7 +61,7 @@ export default function SignOutPage() {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
           selfie: photo,
-          signOutAmount: amount || 0,   // 0 if no amount selected
+          signOutAmount: amount,   // Can be 0
         }),
       });
 
@@ -70,9 +70,9 @@ export default function SignOutPage() {
       if (res.ok) {
         const msg = amount > 0 
           ? `✅ Signed out successfully! Received UGX ${amount}` 
-          : '✅ Signed out successfully!';
+          : '✅ Signed out successfully! (No cash withdrawn)';
         setMessage(msg);
-        setTimeout(() => router.push('/employee'), 1800);
+        setTimeout(() => router.push('/employee'), 2000);
       } else {
         setMessage(data.error || 'Sign out failed');
       }
@@ -89,17 +89,19 @@ export default function SignOutPage() {
         <h1 className="text-3xl font-bold text-center mb-2">Sign Out</h1>
         <p className="text-center text-gray-600 mb-8">8:00pm – 11:30pm EAT • Max UGX 20,000</p>
 
-        <div className="mb-6">
+        <div className="mb-8">
           <label className="block text-sm font-medium mb-2">Sign Out Amount (Optional)</label>
           <input
             type="number"
             value={amount}
-            onChange={(e) => setAmount(Math.max(0, Number(e.target.value)))}
+            onChange={(e) => setAmount(Math.max(0, Number(e.target.value) || 0))}
             max={20000}
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-2xl font-semibold"
-            placeholder="0 = No withdrawal"
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-2xl font-semibold text-center"
+            placeholder="0 = No cash withdrawal"
           />
-          <p className="text-xs text-gray-500 mt-1">Maximum allowed: 20,000 UGX (Leave 0 if no cash needed)</p>
+          <p className="text-xs text-gray-500 mt-2 text-center">
+            You can leave it at 0 if you don't want to withdraw cash
+          </p>
         </div>
 
         <div className="mb-8">
@@ -110,43 +112,43 @@ export default function SignOutPage() {
         <div className="flex gap-4 mb-6">
           <button 
             onClick={startCamera}
-            className="flex-1 bg-gray-800 text-white py-3 rounded-2xl"
+            className="flex-1 bg-gray-800 text-white py-3 rounded-2xl font-medium"
           >
             Start Camera
           </button>
           <button 
             onClick={takeSelfie}
-            className="flex-1 bg-blue-600 text-white py-3 rounded-2xl"
+            className="flex-1 bg-blue-600 text-white py-3 rounded-2xl font-medium"
           >
             Take Selfie
           </button>
         </div>
 
         {photo && (
-          <div className="mb-6">
-            <img src={photo} alt="Selfie" className="w-full rounded-2xl" />
+          <div className="mb-8 rounded-2xl overflow-hidden border">
+            <img src={photo} alt="Selfie" className="w-full" />
           </div>
         )}
 
         <button 
           onClick={handleSignOut}
           disabled={loading || !photo}
-          className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white py-4 rounded-2xl text-lg font-semibold"
+          className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white py-4 rounded-2xl text-lg font-semibold transition"
         >
           {loading ? 'Signing Out...' : 'Sign Out Now'}
         </button>
 
         {message && (
-          <p className={`mt-4 text-center font-medium ${message.includes('✅') ? 'text-green-600' : 'text-red-600'}`}>
+          <p className={`mt-5 text-center font-medium ${message.includes('✅') ? 'text-green-600' : 'text-red-600'}`}>
             {message}
           </p>
         )}
 
         <button 
           onClick={() => router.push('/employee')}
-          className="mt-6 text-gray-500 underline w-full"
+          className="mt-8 text-gray-500 underline block w-full text-center"
         >
-          Back to Dashboard
+          ← Back to Dashboard
         </button>
       </div>
     </div>
