@@ -7,7 +7,7 @@ export default function SignOutPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [photo, setPhoto] = useState<string | null>(null);
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState(0);   // Default 0 = no withdrawal
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const router = useRouter();
@@ -38,8 +38,8 @@ export default function SignOutPage() {
       setMessage('Please take a selfie first');
       return;
     }
-    if (amount > 20000 || amount <= 0) {
-      setMessage('Sign out amount must be between 1 and 20,000 UGX');
+    if (amount > 20000) {
+      setMessage('Maximum sign out amount is UGX 20,000');
       return;
     }
 
@@ -61,15 +61,18 @@ export default function SignOutPage() {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
           selfie: photo,
-          signOutAmount: amount,
+          signOutAmount: amount || 0,   // 0 if no amount selected
         }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        setMessage(`✅ Signed out successfully! Received UGX ${amount}`);
-        setTimeout(() => router.push('/employee'), 2000);
+        const msg = amount > 0 
+          ? `✅ Signed out successfully! Received UGX ${amount}` 
+          : '✅ Signed out successfully!';
+        setMessage(msg);
+        setTimeout(() => router.push('/employee'), 1800);
       } else {
         setMessage(data.error || 'Sign out failed');
       }
@@ -87,16 +90,16 @@ export default function SignOutPage() {
         <p className="text-center text-gray-600 mb-8">8:00pm – 11:30pm EAT • Max UGX 20,000</p>
 
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Sign Out Amount (UGX)</label>
+          <label className="block text-sm font-medium mb-2">Sign Out Amount (Optional)</label>
           <input
             type="number"
             value={amount}
-            onChange={(e) => setAmount(Number(e.target.value))}
+            onChange={(e) => setAmount(Math.max(0, Number(e.target.value)))}
             max={20000}
             className="w-full border border-gray-300 rounded-xl px-4 py-3 text-2xl font-semibold"
-            placeholder="Max 20,000"
+            placeholder="0 = No withdrawal"
           />
-          <p className="text-xs text-gray-500 mt-1">Maximum allowed: 20,000 UGX per sign-out</p>
+          <p className="text-xs text-gray-500 mt-1">Maximum allowed: 20,000 UGX (Leave 0 if no cash needed)</p>
         </div>
 
         <div className="mb-8">
@@ -127,7 +130,7 @@ export default function SignOutPage() {
 
         <button 
           onClick={handleSignOut}
-          disabled={loading || !photo || amount === 0}
+          disabled={loading || !photo}
           className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white py-4 rounded-2xl text-lg font-semibold"
         >
           {loading ? 'Signing Out...' : 'Sign Out Now'}
