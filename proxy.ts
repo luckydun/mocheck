@@ -14,18 +14,29 @@ export function proxy(request: NextRequest) {
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as any;
     const role = decoded.role;
-
     const pathname = request.nextUrl.pathname;
 
-    if (pathname.startsWith('/admin') && role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/', request.url));
+    // Allow Admin full access
+    if (role === 'ADMIN') {
+      return NextResponse.next();
     }
 
-    if (pathname.startsWith('/hr') && !['ADMIN', 'HR'].includes(role)) {
-      return NextResponse.redirect(new URL('/', request.url));
+    // Allow HR access to employee management, attendance and PDF
+    if (role === 'HR') {
+      if (pathname.startsWith('/admin/employees') || 
+          pathname.startsWith('/admin/attendance') || 
+          pathname.startsWith('/admin/pdf')) {
+        return NextResponse.next();
+      }
     }
 
-    return NextResponse.next();
+    // Employee only allowed to their own dashboard
+    if (role === 'EMPLOYEE' && pathname.startsWith('/employee')) {
+      return NextResponse.next();
+    }
+
+    // If none of the above, redirect to login
+    return NextResponse.redirect(new URL('/', request.url));
   } catch {
     return NextResponse.redirect(new URL('/', request.url));
   }
