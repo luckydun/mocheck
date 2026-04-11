@@ -20,22 +20,30 @@ export async function PUT(
       }
     });
 
-    return NextResponse.json({ 
-      message: 'Employee updated successfully', 
-      employee: updated 
-    });
+    return NextResponse.json({ message: 'Employee updated successfully', employee: updated });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: 'Failed to update employee' }, { status: 500 });
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  req: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const { id } = await params;
+
+    // Prevent deleting Admin
+    const userToDelete = await prisma.user.findUnique({ where: { id } });
+    if (userToDelete?.role === 'ADMIN') {
+      return NextResponse.json({ error: 'Cannot delete Admin account' }, { status: 400 });
+    }
+
     await prisma.user.delete({ where: { id } });
     return NextResponse.json({ message: 'Employee removed successfully' });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Failed to remove employee' }, { status: 500 });
   }
 }
