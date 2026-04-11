@@ -30,16 +30,12 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  req: NextRequest, 
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     await prisma.user.delete({ where: { id } });
     return NextResponse.json({ message: 'Employee removed successfully' });
   } catch (error) {
-    console.error(error);
     return NextResponse.json({ error: 'Failed to remove employee' }, { status: 500 });
   }
 }
